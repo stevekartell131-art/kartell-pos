@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kartell POS — Restaurant Point of Sale</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div id="loginScreen" class="login-screen">
+  <div class="login-box">
+    <div class="brand-mark login-mark">K</div>
+    <h1>Kartell POS</h1>
+    <p>Sign in to Kartell Kitchen</p>
+    <label>Staff member
+      <select id="loginUser">
+        <option value="Steve|Manager|1234">Steve Kartell — Manager</option>
+        <option value="Mercy|Waiter|1111">Mercy — Waiter</option>
+        <option value="James|Waiter|2222">James — Waiter</option>
+        <option value="Peter|Cashier|3333">Peter — Cashier</option>
+      </select>
+    </label>
+    <label>PIN
+      <input id="loginPin" type="password" inputmode="numeric" maxlength="4" placeholder="••••">
+    </label>
+    <div id="loginError" class="login-error"></div>
+    <button class="primary login-btn" onclick="attemptLogin()">Sign in</button>
+    <small class="login-hint">Demo PINs — Manager 1234 · Mercy 1111 · James 2222 · Peter 3333</small>
+  </div>
+</div>
+
+<div class="app">
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-mark">K</div>
+      <div><strong>KARTELL</strong><span>RESTAURANT POS</span></div>
+    </div>
+
+    <div class="restaurant">
+      <div class="restaurant-icon">🍽</div>
+      <div><small>ACTIVE RESTAURANT</small><b id="sidebarRestaurantName">Kartell Kitchen</b></div>
+      <span class="online-dot"></span>
+    </div>
+
+    <nav>
+      <p class="nav-label">WORKSPACE</p>
+      <button class="nav-item active" data-page="dashboard"><span>▦</span> Dashboard</button>
+      <button class="nav-item" data-page="tables"><span>⌘</span> Tables</button>
+      <button class="nav-item" data-page="orders"><span>☷</span> Orders</button>
+      <button class="nav-item" data-page="menu"><span>◈</span> Menu</button>
+      <button class="nav-item" data-page="kitchen"><span>♨</span> Kitchen</button>
+      <p class="nav-label">BUSINESS</p>
+      <button class="nav-item" data-page="payments"><span>₵</span> Payments</button>
+      <button class="nav-item" data-page="reports"><span>▥</span> Reports</button>
+      <button class="nav-item" data-page="settings"><span>⚙</span> Settings</button>
+    </nav>
+
+    <div class="sidebar-bottom">
+      <div class="user-card">
+        <div class="avatar" id="sidebarAvatar">SK</div>
+        <div><b id="sidebarUserName">Steve Kartell</b><small id="sidebarUserRole">Manager</small></div>
+        <button title="Sign out" onclick="logout()">⎋</button>
+      </div>
+      <div class="offline" id="offlineIndicator"><span></span> Offline-first mode</div>
+    </div>
+  </aside>
+
+  <main class="main">
+    <header class="topbar">
+      <div class="mobile-brand">KARTELL</div>
+      <div class="search"><span>⌕</span><input id="search" placeholder="Search orders, tables, menu..."></div>
+      <div class="top-actions">
+        <button class="icon-btn">◔</button>
+        <button class="icon-btn notification">♢<i></i></button>
+        <div class="date" id="topDate">Sunday, 23 Aug 2026</div>
+      </div>
+    </header>
+
+    <section id="dashboard" class="page active-page">
+      <div class="page-heading">
+        <div><span class="eyebrow">OVERVIEW</span><h1 id="dashGreeting">Good evening, Steve <span>👋</span></h1><p>Here’s what is happening at <span id="dashRestaurantName">Kartell Kitchen</span> today.</p></div>
+        <button class="primary" onclick="openNewOrderPicker()">＋ New Order</button>
+      </div>
+
+      <div class="stats">
+        <div class="stat-card"><div class="stat-icon green">KSh</div><div><span>Today's Sales</span><strong id="statSales">KSh 0</strong><em class="up" id="statSalesTrend">—</em></div><div class="spark"></div></div>
+        <div class="stat-card"><div class="stat-icon blue">↗</div><div><span>Orders Today</span><strong id="statOrders">0</strong><em class="up" id="statOrdersTrend">—</em></div><div class="mini-bars"></div></div>
+        <div class="stat-card"><div class="stat-icon orange">⌂</div><div><span>Tables Occupied</span><strong id="statTables">0 <small>/ 20</small></strong><em id="statOccupancyPct">0% occupancy</em></div><div class="occupancy"><i id="occupancyBar" style="width:0%"></i></div></div>
+        <div class="stat-card"><div class="stat-icon purple">₵</div><div><span>Pending Payments</span><strong id="statPending">KSh 0</strong><em class="warn" id="statPendingCount">0 bills pending</em></div></div>
+      </div>
+
+      <div class="content-grid">
+        <div class="panel floor-panel">
+          <div class="panel-head"><div><h2>Restaurant Floor</h2><p>20 tables · Main Dining</p></div><button class="ghost" onclick="showPage('tables')">View floor plan →</button></div>
+          <div class="legend"><span><i class="free"></i> Available</span><span><i class="busy"></i> Occupied</span><span><i class="bill"></i> Bill requested</span></div>
+          <div class="floor" id="dashFloor"></div>
+        </div>
+
+        <div class="panel activity-panel">
+          <div class="panel-head"><div><h2>Live Activity</h2><p>Updated just now</p></div><span class="live">● LIVE</span></div>
+          <div class="activity" id="activityFeed"></div>
+        </div>
+      </div>
+
+      <div class="bottom-grid">
+        <div class="panel">
+          <div class="panel-head"><div><h2>Recent Orders</h2><p>Today's latest transactions</p></div><button class="ghost" onclick="showPage('orders')">View all →</button></div>
+          <div class="table-wrap"><table><thead><tr><th>ORDER</th><th>TABLE</th><th>ITEMS</th><th>AMOUNT</th><th>STATUS</th></tr></thead>
+          <tbody id="recentOrdersTable"></tbody></table></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="tables" class="page">
+      <div class="page-heading"><div><span class="eyebrow">FLOOR PLAN</span><h1>Tables</h1><p>Manage table occupancy and open orders.</p></div><button class="primary" onclick="openNewOrderPicker()">＋ New Order</button></div>
+      <div class="panel full-floor"><div class="legend"><span><i class="free"></i> Available</span><span><i class="busy"></i> Occupied</span><span><i class="bill"></i> Bill requested</span></div><div class="large-floor" id="largeFloor"></div></div>
+    </section>
+
+    <section id="orders" class="page">
+      <div class="page-heading"><div><span class="eyebrow">SALES</span><h1>Orders</h1><p>Track today's orders and their status.</p></div><button class="primary" onclick="openNewOrderPicker()">＋ New Order</button></div>
+      <div class="panel"><div class="filter-row" id="orderFilters"></div><div class="table-wrap"><table><thead><tr><th>ORDER</th><th>TABLE</th><th>SERVER</th><th>ITEMS</th><th>TOTAL</th><th>STATUS</th></tr></thead><tbody id="ordersTable"></tbody></table></div></div>
+    </section>
+
+    <section id="menu" class="page">
+      <div class="page-heading"><div><span class="eyebrow">CATALOG</span><h1>Menu</h1><p>Manage dishes, prices and categories.</p></div><button class="primary" onclick="toast('Menu item editor opened')">＋ Add Menu Item</button></div>
+      <div class="category-tabs" id="categoryTabs"></div>
+      <div class="menu-grid" id="menuGrid"></div>
+    </section>
+
+    <section id="kitchen" class="page">
+      <div class="page-heading"><div><span class="eyebrow">KITCHEN</span><h1>Kitchen Display</h1><p>Monitor KOTs from order to ready.</p></div><span class="live big-live">● LIVE</span></div>
+      <div class="kot-grid" id="kotGrid"></div>
+    </section>
+
+    <section id="payments" class="page">
+      <div class="page-heading"><div><span class="eyebrow">FINANCE</span><h1>Payments</h1><p>Cash, M-Pesa and card transactions.</p></div></div>
+      <div class="stats compact">
+        <div class="stat-card"><div class="stat-icon green">KSh</div><div><span>Total collected</span><strong id="payTotal">KSh 0</strong></div></div>
+        <div class="stat-card"><div class="stat-icon blue">M</div><div><span>M-Pesa</span><strong id="payMpesa">KSh 0</strong></div></div>
+        <div class="stat-card"><div class="stat-icon orange">C</div><div><span>Cash</span><strong id="payCash">KSh 0</strong></div></div>
+        <div class="stat-card"><div class="stat-icon purple">▣</div><div><span>Card</span><strong id="payCard">KSh 0</strong></div></div>
+      </div>
+      <div class="panel"><div class="table-wrap"><table><thead><tr><th>REFERENCE</th><th>ORDER</th><th>METHOD</th><th>AMOUNT</th><th>TIME</th><th>STATUS</th></tr></thead><tbody id="paymentsTable"></tbody></table></div></div>
+    </section>
+
+    <section id="reports" class="page">
+      <div class="page-heading"><div><span class="eyebrow">INSIGHTS</span><h1>Reports</h1><p>Business performance at a glance.</p></div><button class="ghost" onclick="toast('Report export prepared')">Export Report ↓</button></div>
+      <div class="report-card panel"><div class="panel-head"><div><h2>Sales overview</h2><p>Last 7 days</p></div><strong>KSh 286,420</strong></div><div class="chart"><div class="bars"><i style="height:42%"></i><i style="height:58%"></i><i style="height:51%"></i><i style="height:72%"></i><i style="height:66%"></i><i style="height:88%"></i><i style="height:78%"></i></div><div class="chart-labels"><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span></div></div></div>
+    </section>
+
+    <section id="settings" class="page">
+      <div class="page-heading"><div><span class="eyebrow">SYSTEM</span><h1>Settings</h1><p>Configure your restaurant and POS preferences.</p></div></div>
+      <div class="settings-grid">
+        <div class="panel settings-card">
+          <h2>Restaurant</h2>
+          <label>Restaurant name<input id="settingName"></label>
+          <label>Currency<input id="settingCurrency"></label>
+          <label>Receipt footer<input id="settingFooter"></label>
+          <button class="primary" onclick="saveSettings()">Save Changes</button>
+        </div>
+        <div class="panel settings-card">
+          <h2>Security & Access</h2>
+          <div class="setting-row"><div><b>Require login</b><p>Staff must sign in before using POS.</p></div><input id="settingRequireLogin" type="checkbox"></div>
+          <div class="setting-row"><div><b>Offline-first mode</b><p>Core operations work without internet.</p></div><input id="settingOffline" type="checkbox"></div>
+          <div class="setting-row"><div><b>Automatic backups</b><p>Back up local SQLite data periodically.</p></div><input id="settingBackup" type="checkbox"></div>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<div id="orderModal" class="modal">
+  <div class="modal-box order-box">
+    <button class="close" onclick="closeOrder()">×</button>
+    <div class="modal-head">
+      <div><span class="eyebrow">ORDER</span><h2 id="orderModalTitle">Table —</h2><p id="orderModalSubtitle">Select menu items to build the order.</p></div>
+      <span class="table-status" id="orderModalStatus">● Available</span>
+    </div>
+    <div class="order-layout">
+      <div>
+        <div class="quick-search"><span>⌕</span><input placeholder="Search menu..." oninput="filterMenu(this.value)"></div>
+        <div class="quick-menu" id="quickMenu"></div>
+      </div>
+      <div class="cart">
+        <div class="cart-head"><b>Current Order</b><span id="cartCount">0 items</span></div>
+        <div id="cartItems" class="cart-items"><div class="empty">No items yet.<br><small>Select a menu item.</small></div></div>
+        <div class="cart-total"><span>Subtotal</span><b id="cartTotal">KSh 0</b></div>
+        <button class="ghost pay-btn" id="requestBillBtn" onclick="requestBill()" style="display:none;margin-bottom:8px">Request Bill</button>
+        <button class="primary pay-btn" onclick="checkout()">Send to Kitchen →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="pickTableModal" class="modal">
+  <div class="modal-box" style="width:min(560px,100%)">
+    <button class="close" onclick="closePickTable()">×</button>
+    <div class="modal-head"><div><span class="eyebrow">NEW ORDER</span><h2>Pick a table</h2><p>Choose an available table to start an order.</p></div></div>
+    <div class="large-floor" id="pickTableFloor" style="padding:10px"></div>
+  </div>
+</div>
+
+<div id="paymentModal" class="modal">
+  <div class="modal-box" style="width:min(560px,100%)">
+    <button class="close" onclick="closePayment()">×</button>
+    <div class="modal-head"><div><span class="eyebrow">BILL</span><h2 id="paymentModalTitle">Table —</h2><p>Settle the bill for this table.</p></div></div>
+
+    <div class="bill-summary">
+      <div><span>Order total</span><b id="paymentTotal">KSh 0</b></div>
+    </div>
+
+    <div class="split-toggle">
+      <label class="switch-row"><input type="checkbox" id="splitEnabled" onchange="toggleSplit()"> Split this bill</label>
+      <div id="splitControls" class="split-controls" style="display:none">
+        <label>Number of guests
+          <input type="number" id="splitCount" min="2" max="12" value="2" oninput="renderPaymentSummary()">
+        </label>
+        <div id="splitBreakdown" class="split-breakdown"></div>
+      </div>
+    </div>
+
+    <div class="method-select">
+      <button class="method-btn active" data-method="mpesa" onclick="selectMethod('mpesa')">M-Pesa</button>
+      <button class="method-btn" data-method="cash" onclick="selectMethod('cash')">Cash</button>
+      <button class="method-btn" data-method="card" onclick="selectMethod('card')">Card</button>
+    </div>
+
+    <div id="mpesaFields" class="mpesa-fields">
+      <label>Customer phone number
+        <input id="mpesaPhone" placeholder="07XX XXX XXX">
+      </label>
+      <div id="stkStatus" class="stk-status"></div>
+    </div>
+
+    <button class="primary pay-btn" id="confirmPaymentBtn" onclick="confirmPayment()">Send STK Push</button>
+  </div>
+</div>
+
+<div id="toast" class="toast"></div>
+<script src="app.js"></script>
+</body>
+</html>
